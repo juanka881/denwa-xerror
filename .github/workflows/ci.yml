@@ -1,4 +1,4 @@
-name: Node.js CI
+name: master-ci
 on:
   push:
     branches: [ master ]
