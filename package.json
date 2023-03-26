@@ -1,8 +1,11 @@
 {
 	"name": "@denwa/xerror",
 	"version": "1.0.0",
-	"main": "index.js",
+	"main": "./dist/src/index.js",
 	"types": "index.",
+	"files": [
+		"./dist/src/*"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/juanka881/denwa-xerror.git"
@@ -11,25 +14,39 @@
 		"error",
 		"xerror"
 	],
-	"author": "",
+	"author": "https://github.com/juanka881",
 	"license": "ISC",
 	"bugs": {
 		"url": "https://github.com/juanka881/denwa-xerror/issues"
 	},
 	"homepage": "https://github.com/juanka881/denwa-xerror#readme",
-	"description": "extended error handling for nodejs",
+	"description": "extended error types for nodejs",
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
-		"build": "tsc && cp -v package.json dist/src",
-		"test": "echo \"Error: no test specified\" && exit 0",
-		"_pack": "pnpm build && cd dist/src && npm pack"
+		"clean": "rimraf ./dist",
+		"build": "tsc",
+		"test": "mocha",
+		"cover": "c8 mocha",
+		"coverv": "start ./dist/coverage/lcov-report/index.html"
 	},
 	"devDependencies": {
-		"@types/uuid": "^8.3.1",
-		"typescript": "^4.3.5"
+		"@swc/core": "^1.3.42",
+		"@swc/helpers": "^0.4.14",
+		"@types/chai": "^4.3.4",
+		"@types/mocha": "^10.0.1",
+		"@types/node": "^18.15.10",
+		"c8": "^7.13.0",
+		"chai": "^4.3.7",
+		"mocha": "^10.2.0",
+		"rimraf": "^4.4.1",
+		"source-map-support": "^0.5.21",
+		"ts-node": "^10.9.1",
+		"typescript": "^4.9.5"
 	},
 	"dependencies": {
-		"tslib": "^2.3.0",
-		"uuid": "^8.3.2"
+		"tslib": "^2.5.0"
+	},
+	"volta": {
+		"node": "18.7.0"
 	}
 }
