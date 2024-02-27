@@ -1,84 +1,37 @@
-import { XErrorData, XErrorDTO } from './types';
-import { randomUUID } from 'node:crypto';
-import { isErrorType, toErrorDTO } from './utils';
+import { ErrorJson } from './types.js';
+import { isType, toErrorJson } from './utils.js';
 
 /**
- * Error options used when creating a new XError instance.
+ * Create custom error types by extending XErrror. 
+ * XError has a uniform structure and can be easily 
+ * serialized to json to capture all error details 
+ * for troubleshooting.
  */
-export interface XErrorOptions<TData = XErrorData> {
+export class XError<TDetail = any> extends Error {
 	/**
-	 * set error message, 
-	 * if not set defaults to constructor static message property
-	 * or '' if not set
-	 */
-	message?: string; 
-
-	/**
-	 * override error name;
-	 */
-	name?: string;
-
-	/**
-	 * sets addtional error data properties,
-	 * if type.data is defined, properties are merged
-	 * with this data
-	 */
-	data?: TData;
-
-	/**
-	 * sets error that caused this error
-	 * to be thrown
-	 */
-	cause?: Error;
-
-	/**
-	 * override error id,
-	 * if not set defaults to uuid.v1()
+	 * error id
 	 */
 	id?: string;
 
 	/**
-	 * override error time,
-	 * if not set defaults to new Date()
-	 */
-	time?: Date;
-
-	/**
-	 * override transient flag,
-	 * if not set defaults to constructor static transient property
-	 * or true if not set
-	 */
-	transient?: boolean;
-}
-
-/**
- * XError class allows to created custom errors
- * without having to redefine new classes for each
- * error type.
- *
- * errors can capture data, id, time, and transient flag
- * to allow better inspection and retry handling.
- */
-export class XError<TData extends XErrorData = XErrorData> extends Error {
-	/**
-	 * error data
-	 */
-	data?: TData;
-
-	/**
-	 * error cause
-	 */
-	cause?: Error;
-
-	/**
-	 * error id
-	 */
-	id: string;
-
-	/**
-	 * error time
+	 * time when error ocurred
 	 */
 	time: Date;
+
+	/**
+	 * error which cause this error to occur
+	 */
+	cause?: unknown;	
+
+	/**
+	 * error code
+	 */
+	code?: string;
+
+	/**
+	 * error details
+	 */
+	detail?: TDetail;	
 
 	/**
 	 * error transient flag
@@ -87,36 +40,34 @@ export class XError<TData extends XErrorData = XErrorData> extends Error {
 
 	/**
 	 * creates a new xerror instance
-	 * @param options xerror options
+	 * @param message error message
+	 * @param detail addtional error detail data
+	 * @param cause error which cause this error
 	 */
-	constructor(options?: XErrorOptions<TData>) {
-		super(options?.message);
+	constructor(message?: string, detail?: TDetail) {
+		super(message);
 		Object.setPrototypeOf(this, new.target.prototype);
 
-		if(!this.message && (this.constructor as any).message) {
-			this.message = (this.constructor as any).message;
-		}
-		
-		this.name = options?.name ?? this.constructor.name;
+		this.name = this.constructor.name;
+		this.message = message ?? '';
 
 		// capturing the stack trace keeps the reference to your error class
+		// for nodejs
 		if(typeof (Error as any).captureStackTrace === 'function') {
 			(Error as any).captureStackTrace(this, this.constructor);
 		}
 
-		this.data = options?.data;
-		this.cause = options?.cause;
-		this.transient = options?.transient ?? ('transient' in this.constructor ? this.constructor.transient as boolean : true);
-		this.id = options?.id ?? randomUUID();
-		this.time = options?.time ?? new Date();
+		this.detail = detail;		
+		this.transient = true;
+		this.time = new Date();
 	}
 
 	/**
 	 * converts xerror instance to json object
 	 * @returns error dto
 	 */
-	toJSON(): XErrorDTO {
-		return toErrorDTO(this);
+	toJSON(): ErrorJson {
+		return toErrorJson(this);
 	}
 
 	/**
@@ -126,6 +77,66 @@ export class XError<TData extends XErrorData = XErrorData> extends Error {
 	 * @returns true if same, false otherwise
 	 */
 	isType<TType extends Error | unknown>(type: TType): this is TType {
-		return isErrorType(this, type);
+		return isType(this, type);
+	}
+
+	/**
+	 * set error message
+	 * @param message error message
+	 * @returns self
+	 */
+	setMessage(message: string): this {
+		this.message = message;
+		return this;	
+	}
+
+	/**
+	 * set error id
+	 * @param id error id
+	 * @returns self
+	 */
+	setId(id: string): this {
+		this.id = id;
+		return this;
+	}
+
+	/**
+	 * set error code
+	 * @param code error code
+	 * @returns self
+	 */
+	setCode(code: string): this {
+		this.code = code;
+		return this;
+	}
+
+	/**
+	 * set error cause
+	 * @param cause error cause
+	 * @returns self
+	 */
+	setCause(cause: unknown): this {
+		this.cause = cause;
+		return this;
+	}
+
+	/**
+	 * set error detail
+	 * @param detail error detail
+	 * @returns self
+	 */
+	setDetail(detail: TDetail): this {
+		this.detail = detail;
+		return this;	
+	}
+
+	/**
+	 * set transient flag
+	 * @param transient transient flag
+	 * @returns self
+	 */
+	setTransient(transient: boolean): this {
+		this.transient = transient;
+		return this;
 	}
 }

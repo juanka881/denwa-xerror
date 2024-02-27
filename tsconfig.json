@@ -1,33 +1,12 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
+	"extends": "./.config/esnext.tsconfig.json",
 	"compilerOptions": {
-		"importHelpers": true,
-		"incremental": true,
-		"noEmitOnError": true,
-		"sourceMap": true,
-		"declaration": true,
-		"lib": [
-			"ESNext"
-		],
-		"module": "CommonJS",
-		"target": "ESNext",
-		"moduleResolution": "node",
-		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
 		"rootDir": ".",
-		"outDir": "dist"
+		"outDir": "dist",
 	},
 	"include": [
 		"src",
 		"test"
-	],
-	"exclude": [
-		"node_modules",
-		"dist"
-	],
-	"ts-node": {
-		"swc": true
-	}
+	]
 }

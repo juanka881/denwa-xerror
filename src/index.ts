@@ -1,2 +1,2 @@
-export { XError } from './xerror';
-export { errorf } from './utils';
+export { XError } from './xerror.js';
+export { errorf } from './utils.js';

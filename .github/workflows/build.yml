@@ -1,4 +1,4 @@
-name: master-ci
+name: Build
 on:
   push:
     branches: [ master ]
@@ -7,23 +7,24 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [21.x]
     steps:
-    - uses: actions/checkout@v3
-    - uses: pnpm/action-setup@v2
+    - uses: actions/checkout@v4
+
+    - uses: pnpm/action-setup@v3
       with:
-        version: 7
+        version: latest
     
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Setup node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
       
-    - name: Install dependencies
+    - name: Install packages
       run: pnpm install
       
     - name: Build Project
@@ -33,7 +34,7 @@ jobs:
       run: npm test
       
     - name: Publish Package
-      uses: JS-DevTools/npm-publish@v1
+      uses: JS-DevTools/npm-publish@v3
       with:
         token: ${{ secrets.NPM_TOKEN }}
         access: public

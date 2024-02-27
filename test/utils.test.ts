@@ -1,119 +1,90 @@
-import { assert } from 'chai';
-import { test, suite } from 'mocha';
-import { XError } from '../src';
-import * as utils from '../src/utils';
+import { test, suite, assert } from 'vitest';
+import { XError } from '../src/xerror.js';
+import * as utils from '../src/utils.js';
 
-suite('utils: getErrorData', function () {
+suite('getDetail', function () {
 	test('returns undefined if nil', function () {
-		assert.equal(utils.getErrorData(undefined), undefined);
-		assert.equal(utils.getErrorData(null), undefined);
+		assert.equal(utils.getDetail(undefined), undefined);
+		assert.equal(utils.getDetail(null), undefined);
 	});
+	
 
-	test('can get error data from xerror', function () {
+	test('can get detail from xerror', function () {
 		class FooError extends XError { };
-		const data = { foo: 'bar' };
-		const error = new FooError({ data });
+		const detail = { foo: 'bar' };
+		const error = new FooError().setDetail(detail);
 
-		assert.strictEqual(utils.getErrorData(error), data);
+		assert.strictEqual(utils.getDetail(error), detail);
 	});
 
-	test('can get error from plain error', function () {
+	test('can get detail from error', function () {
 		const error: any = new Error();
 		error.name = 'foo';
 		error.foo = 'bar';
-		const data = utils.getErrorData(error);
+		const data = utils.getDetail(error);
 
-		assert.deepEqual(data, {
-			foo: 'bar'
-		});
+		assert.deepEqual(data, { foo: 'bar' });
 	})
 });
 
-suite('utils: toErrorDTO', function() {
-	test('can convert error to dto', function() {
+suite('toErrorJson', function() {
+	test('can convert error json', function() {
 		const error = new Error();
-		const dto = utils.toErrorDTO(error);
+		const json = utils.toErrorJson(error);
 
-		assert.equal(dto.name, 'Error');
-		assert.equal(dto.message, '');
-		assert.equal(dto.data, undefined);
-		assert.equal(dto.cause, undefined);
-		assert.equal(dto.id, '');
-		assert.equal(dto.time instanceof Date, true);
+		assert.equal(json.name, 'Error');
+		assert.equal(json.message, '');
+		assert.equal(json.detail, undefined);
+		assert.equal(json.cause, undefined);
+		assert.equal(json.id, undefined);
+		assert.isNotNaN(Date.parse(json.time));
 	});
 
-	test('can covnert error with cause', function() {
+	test('can convert error with cause', function() {
 		const cause = new Error('bar');
 		const error = new Error('foo', { cause });
-		const dto = utils.toErrorDTO(error);
+		const json = utils.toErrorJson(error);
 
-		assert.equal(dto.cause?.name, 'Error');
-		assert.equal(dto.cause?.message, 'bar');
-		assert.equal(dto.cause?.data, undefined);
-		assert.equal(dto.cause?.cause, undefined);
-		assert.equal(dto.cause?.id, '');
-		assert.equal(dto.cause?.time instanceof Date, true);
+		assert.equal(json.cause?.name, 'Error');
+		assert.equal(json.cause?.message, 'bar');
+		assert.equal(json.cause?.detail, undefined);
+		assert.equal(json.cause?.cause, undefined);
+		assert.equal(json.cause?.id, undefined);
+		assert.isNotNaN(Date.parse(json.time));
 	});
 }); 
 
-suite('utils: isErrorType', function() {
+suite('isType', function() {
 	class FooError extends XError {};
 	class BarError extends XError {};
 
 	test('nil returns false', function() {
-		assert.equal(utils.isErrorType(null, Error), false);
-		assert.equal(utils.isErrorType(undefined, Error), false);
+		assert.equal(utils.isType(null, Error), false);
+		assert.equal(utils.isType(undefined, Error), false);
 	});
 
 	test('can check type', function() {
 		const error = new Error();
-		assert.equal(utils.isErrorType(error, Error), true);
-		assert.equal(utils.isErrorType(error, FooError), false);
+		assert.equal(utils.isType(error, Error), true);
+		assert.equal(utils.isType(error, FooError), false);
 
 		const foo = new FooError();
-		assert.equal(utils.isErrorType(foo, Error), true);
-		assert.equal(utils.isErrorType(foo, FooError), true);
-		assert.equal(utils.isErrorType(foo, BarError), false);
+		assert.equal(utils.isType(foo, Error), true);
+		assert.equal(utils.isType(foo, FooError), true);
+		assert.equal(utils.isType(foo, BarError), false);
 	});
 }); 
 
-suite('utils: isErrorTransient', function() {
-	class FooError extends XError {};
-	class BarError extends XError {};
-
-	test('nil returns false', function() {
-		assert.equal(utils.isErrorTransient(null), false);
-		assert.equal(utils.isErrorTransient(undefined), false);
-	});
-
-	test('returns transient property if set', function() {
-		const error = new Error();
-		(error as any).transient = false;
-		assert.equal(utils.isErrorTransient(error), false);
-
-		const foo = new FooError();
-		assert.equal(utils.isErrorTransient(foo), true);
-	});
-
-	test('returns true if not set', function() {
-		const error = new Error();
-		assert.equal(utils.isErrorTransient(error), true);
-	});
-}); 
-
-suite('utils: errorf', function() {
-	test('can create with name and data', function() {
-		const error = utils.errorf('foo', { foo: 'bar' });
-		assert.equal(error.message, 'foo: foo=bar');
-	});
-
-	test('can create with name, and reason', function() {
+suite('errorf', function() {
+	test('can create name and message', function() {
 		const error = utils.errorf('foo', 'invalid');
-		assert.equal(error.message, 'foo: invalid');
+		assert.equal(error.name, 'foo');
+		assert.equal(error.message, 'invalid');
 	});
 
-	test('can create with name, reason, data', function() {
-		const error = utils.errorf('foo', 'invalid', { foo: 'bar' });
-		assert.equal(error.message, 'foo: invalid. foo=bar');
-	});
+	test('can create with detail', function() {
+		const error = utils.errorf('foo', 'foo error', { foo: 'bar' });
+		assert.equal(error.name, 'foo');
+		assert.equal(error.message, 'foo error. foo=bar');
+	});	
 }); 

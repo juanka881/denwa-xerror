@@ -1,61 +1,79 @@
-import { test, suite } from 'mocha';
-import { assert } from 'chai';
-import { XError } from '../src';
+import { test, suite, assert } from 'vitest';
+import { XError } from '../src/xerror.js';
+import { ErrorJson } from '../src/types.js';
 
-suite('xerror: XError', function() {
+suite('XError', function() {
 	class TestError extends XError {
-		static message = 'test error';
-		static transient = false;
+		constructor(message?: string, detail?: any) {
+			super(message ?? 'test error', detail);
+			this.transient = false;
+		}
 	}
 
 	test('can create', function() {
-		class FooError extends XError {}
-		const error = new FooError();
+		const error = new TestError();
 
 		assert.instanceOf(error, Error);
-		assert.instanceOf(error, FooError);
-		assert.equal(error.message, '');
-	});
-
-	test('can create with static message property1', function() {
-		const error = new TestError();
+		assert.instanceOf(error, TestError);
+		assert.equal(error.name, 'TestError');
 		assert.equal(error.message, 'test error');
 	});
 
-	test('can create with static transient property', function() {
-		const error = new TestError();
-		assert.equal(error.transient, false);
-	});
-
-	test('can create and override message property', function() {
-		const error = new TestError({ message: 'foo' });
+	test('can create with message', function() {
+		const error = new TestError('foo');
 		assert.equal(error.message, 'foo');
 	});
 
-	test('can create and override transient property', function() {
-		class FooError extends XError {
-			static transient = false;
-		}
-		const error = new FooError({ transient: true });
-		assert.equal(error.transient, true);
+	test('can create with message and detail', function() {
+		const detail = { foo: 'bar' }
+		const error = new TestError('foo', detail);
+		assert.equal(error.message, 'foo');
+		assert.strictEqual(error.detail, detail);
+	});
+
+	test('can set message', function() {
+		const error = new TestError().setMessage('foo');
+		assert.equal(error.message, 'foo');
+	});
+
+	test('can set id', function() {
+		const error = new TestError().setId('123');
+		assert.equal(error.id, '123');
+	});
+
+	test('can set code', function() {
+		const error = new TestError().setCode('XYZ');
+		assert.equal(error.code, 'XYZ');
+	});
+
+	test('can set detail', function() {
+		const detail = { foo: 'bar' };
+		const error = new TestError().setDetail(detail);
+		assert.strictEqual(error.detail, detail);
+	});
+
+	test('can set cause', function() {
+		const cause = new Error();
+		const error = new TestError().setCause(cause);
+		assert.strictEqual(error.cause, cause);
+	});
+
+	test('can set transient', function() {
+		const error = new TestError().setTransient(false);
+		assert.equal(error.transient, false);
 	});
 
 	test('can convert error to json', function() {
-		const UUID = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
-		const ISO8601 = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/;
+		const detail = { foo: 'bar' };
+		const error = new TestError().setDetail(detail);
+		const json: ErrorJson = JSON.parse(JSON.stringify(error));
 
-		const data = { foo: 'bar' };
-		const error = new TestError({ data });
-		const jsonText = JSON.stringify(error);
-		const dto = JSON.parse(jsonText);
+		assert.equal(json.name, TestError.name);
+		assert.equal(json.message, 'test error');
+		assert.isTrue(Array.isArray(json.stack));
+		assert.isObject(json.detail);
+		assert.deepEqual(json.detail, detail);
 
-		assert.equal(typeof dto.name, 'string');
-		assert.equal(typeof dto.message, 'string');
-		assert.equal(Array.isArray(dto.stack), true);
-		assert.isObject(dto.data);
-		assert.deepEqual(dto.data, data);
-		assert.match(dto.id, UUID, 'id is uuid');
-		assert.match(dto.time, ISO8601, 'time is isi8601');
 	});
 
 	test('can check type', function() {

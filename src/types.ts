@@ -1,69 +1,50 @@
 /**
- * Error DTO that can be safetly serialized to json,
- * used to capture the data from a Error or XError
- * object and serialize for storage and logging
+ * ErrorJSON use to structure the error data
+ * so it can be easily serialized into json
  */
-export interface XErrorDTO {
+export interface ErrorJson {
 	/**
-	 * error code, unique error code use to identify
-	 * the type of error
+	 * error id
+	 */
+	id?: string;
+
+	/**
+	 * time when error ocurred
+	 */
+	time: string;
+
+	/**
+	 * error which cause this error to occur
+	 */
+	cause?: ErrorJson;
+
+	/**
+	 * error code
 	 */
 	code?: string;
+
 	/**
-	 * error name, used to identify typeof error
+	 * error name
 	 */
 	name: string;
 
 	/**
-	 * error message, used to describe why this
-	 * error has occured
+	 * error message
 	 */
 	message: string;
 
 	/**
-	 * error stack, lines are parsed into an array
-	 * for easy viewing
+	 * error stack
 	 */
 	stack: string[];
 
 	/**
 	 * data related to the error being thrown
 	 */
-	data?: Record<string, any>;
+	detail?: Record<string, any>;	
 
 	/**
-	 * internal error that cause this error to
-	 * occured
-	 */
-	cause?: XErrorDTO;
-
-	/**
-	 * error unique id
-	 */
-	id: string;
-
-	/**
-	 * timestamp when error ocurred
-	 */
-	time: Date;
-
-	/**
-	 * transient flag, use to denote if this error can be retried.
-	 * a transient error is a intermittent failure cause by something
-	 * in the environment, usually some kind of connectivity issue
-	 * and attempting to retry it with some delay might fix the
-	 * issue.
-	 *
-	 * a non-transient error is a terminal condition that always ends up
-	 * with the error being generated either due to a programming error
-	 * or a fixed state in the environment.
+	 * error transient flag
 	 */
 	transient: boolean;
 }
-
-/**
- * error data type used to capture
- * context related error data. should always be an object
- * with key value pairs
- */
-export type XErrorData = Record<string, any>;
