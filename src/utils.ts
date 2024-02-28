@@ -54,7 +54,7 @@ export function toErrorJson(error: Error | unknown): ErrorJson {
 	const stack = _error?.stack?.split('\n') ?? [];
 
 	const detail: any = error instanceof XError ? error.detail : getDetail(error);
-	const transient = error instanceof XError ? error.transient : true;
+	const retryable = error instanceof XError ? error.retryable : true;
 	const cause = _error.cause ? toErrorJson(_error.cause) : undefined;
 	const id = _error.id;
 	const time = _error.time ?? new Date();
@@ -67,7 +67,7 @@ export function toErrorJson(error: Error | unknown): ErrorJson {
 		cause,
 		id,
 		time,
-		transient,
+		retryable,
 	};
 }
 
@@ -102,4 +102,30 @@ export function errorf(name: string, message: string, detail?: Record<string, an
 	(error as any).detail = detail;
 
 	return error;
+}
+
+/**
+ * creates a formatted error message
+ * joining the message parts, along with a
+ * list of key value pairs passed in the detail
+ * @param message message parts
+ * @param detail message detail
+ * @returns message text
+ */
+export function messagef(message: string | string[], detail?: Record<string, any>): string {
+	let text = '';
+	if(Array.isArray(message)) {
+		text = message.join(' ');
+	}
+	else {
+		text = message;
+	}
+
+	let fields: string | undefined;
+	if (detail) {
+		fields = Object.entries(detail).map(([k, v]) => `${k}=${v}`).join(', ');
+		text = `${text}. ${fields}`;
+	}
+
+	return text;
 }

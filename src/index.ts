@@ -1,2 +1,2 @@
 export { XError } from './xerror.js';
-export { errorf } from './utils.js';
+export { errorf, messagef } from './utils.js';

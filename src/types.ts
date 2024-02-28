@@ -41,10 +41,10 @@ export interface ErrorJson {
 	/**
 	 * data related to the error being thrown
 	 */
-	detail?: Record<string, any>;	
+	detail?: Record<string, any>;
 
 	/**
-	 * error transient flag
+	 * error retryable flag
 	 */
-	transient: boolean;
+	retryable: boolean;
 }

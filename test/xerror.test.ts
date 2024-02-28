@@ -6,7 +6,7 @@ suite('XError', function() {
 	class TestError extends XError {
 		constructor(message?: string, detail?: any) {
 			super(message ?? 'test error', detail);
-			this.transient = false;
+			this.retryable = false;
 		}
 	}
 
@@ -58,9 +58,9 @@ suite('XError', function() {
 		assert.strictEqual(error.cause, cause);
 	});
 
-	test('can set transient', function() {
-		const error = new TestError().setTransient(false);
-		assert.equal(error.transient, false);
+	test('can set retryable', function() {
+		const error = new TestError().setRetryable(false);
+		assert.equal(error.retryable, false);
 	});
 
 	test('can convert error to json', function() {

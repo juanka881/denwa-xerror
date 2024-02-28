@@ -7,7 +7,7 @@ suite('getDetail', function () {
 		assert.equal(utils.getDetail(undefined), undefined);
 		assert.equal(utils.getDetail(null), undefined);
 	});
-	
+
 
 	test('can get detail from xerror', function () {
 		class FooError extends XError { };
@@ -52,7 +52,7 @@ suite('toErrorJson', function() {
 		assert.equal(json.cause?.id, undefined);
 		assert.isNotNaN(Date.parse(json.time));
 	});
-}); 
+});
 
 suite('isType', function() {
 	class FooError extends XError {};
@@ -73,7 +73,7 @@ suite('isType', function() {
 		assert.equal(utils.isType(foo, FooError), true);
 		assert.equal(utils.isType(foo, BarError), false);
 	});
-}); 
+});
 
 suite('errorf', function() {
 	test('can create name and message', function() {
@@ -86,5 +86,23 @@ suite('errorf', function() {
 		const error = utils.errorf('foo', 'foo error', { foo: 'bar' });
 		assert.equal(error.name, 'foo');
 		assert.equal(error.message, 'foo error. foo=bar');
-	});	
-}); 
+	});
+});
+
+
+suite('messagef', function() {
+	test('can format message', function() {
+		const message = utils.messagef('foo');
+		assert.equal(message, 'foo');
+	});
+
+	test('can format message with multiple parts', function() {
+		const message = utils.messagef(['foo', 'bar']);
+		assert.equal(message, 'foo bar');
+	});
+
+	test('can format message detail', function() {
+		const message = utils.messagef(['foo', 'bar'], { foo: 'bar' });
+		assert.equal(message, 'foo bar. foo=bar');
+	});
+});

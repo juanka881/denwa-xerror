@@ -2,9 +2,9 @@ import { ErrorJson } from './types.js';
 import { isType, toErrorJson } from './utils.js';
 
 /**
- * Create custom error types by extending XErrror. 
- * XError has a uniform structure and can be easily 
- * serialized to json to capture all error details 
+ * Create custom error types by extending XErrror.
+ * XError has a uniform structure and can be easily
+ * serialized to json to capture all error details
  * for troubleshooting.
  */
 export class XError<TDetail = any> extends Error {
@@ -21,7 +21,7 @@ export class XError<TDetail = any> extends Error {
 	/**
 	 * error which cause this error to occur
 	 */
-	cause?: unknown;	
+	cause?: unknown;
 
 	/**
 	 * error code
@@ -31,12 +31,12 @@ export class XError<TDetail = any> extends Error {
 	/**
 	 * error details
 	 */
-	detail?: TDetail;	
+	detail?: TDetail;
 
 	/**
-	 * error transient flag
+	 * error retryable flag
 	 */
-	transient: boolean;
+	retryable: boolean;
 
 	/**
 	 * creates a new xerror instance
@@ -57,8 +57,8 @@ export class XError<TDetail = any> extends Error {
 			(Error as any).captureStackTrace(this, this.constructor);
 		}
 
-		this.detail = detail;		
-		this.transient = true;
+		this.detail = detail;
+		this.retryable = true;
 		this.time = new Date();
 	}
 
@@ -87,7 +87,7 @@ export class XError<TDetail = any> extends Error {
 	 */
 	setMessage(message: string): this {
 		this.message = message;
-		return this;	
+		return this;
 	}
 
 	/**
@@ -127,16 +127,16 @@ export class XError<TDetail = any> extends Error {
 	 */
 	setDetail(detail: TDetail): this {
 		this.detail = detail;
-		return this;	
+		return this;
 	}
 
 	/**
-	 * set transient flag
-	 * @param transient transient flag
+	 * set retryable flag
+	 * @param retryable retryable flag
 	 * @returns self
 	 */
-	setTransient(transient: boolean): this {
-		this.transient = transient;
+	setRetryable(retryable: boolean): this {
+		this.retryable = retryable;
 		return this;
 	}
 }
