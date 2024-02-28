@@ -52,6 +52,21 @@ suite('toErrorJson', function() {
 		assert.equal(json.cause?.id, undefined);
 		assert.isNotNaN(Date.parse(json.time));
 	});
+
+	test('can convert empty error', function() {
+		const error = new Error();
+		(error as any).name = undefined;
+		(error as any).message = undefined;
+		(error as any).stack = undefined;
+
+		const json = utils.toErrorJson(error);
+		assert.equal(json.name, '');
+		assert.equal(json.message, '');
+		assert.equal(json.detail, undefined);
+		assert.equal(json.cause, undefined);
+		assert.equal(json.id, undefined);
+		assert.isNotNaN(Date.parse(json.time));
+	});
 });
 
 suite('isType', function() {

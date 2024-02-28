@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [21.x]
@@ -17,22 +17,22 @@ jobs:
     - uses: pnpm/action-setup@v3
       with:
         version: latest
-    
+
     - name: Setup node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
-      
+
     - name: Install packages
       run: pnpm install
-      
+
     - name: Build Project
       run: pnpm build
-        
+
     - name: Run Tests
-      run: npm test
-      
+      run: pnpm test
+
     - name: Publish Package
       uses: JS-DevTools/npm-publish@v3
       with:

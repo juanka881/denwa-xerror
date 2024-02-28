@@ -44,13 +44,8 @@ export function getDetail(error?: unknown): Record<string, any> | undefined {
  */
 export function toErrorJson(error: Error | unknown): ErrorJson {
 	const _error = error as any;
-	/* c8 ignore next */
 	const name = _error?.name ?? '';
-
-	/* c8 ignore next */
 	const message = _error?.message ?? '';
-
-	/* c8 ignore next */
 	const stack = _error?.stack?.split('\n') ?? [];
 
 	const detail: any = error instanceof XError ? error.detail : getDetail(error);
