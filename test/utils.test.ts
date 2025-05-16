@@ -4,24 +4,24 @@ import * as utils from '../src/utils.js';
 
 suite('getDetail', function () {
 	test('returns undefined if nil', function () {
-		assert.equal(utils.getDetail(undefined), undefined);
-		assert.equal(utils.getDetail(null), undefined);
+		assert.equal(utils.getProperties(undefined), undefined);
+		assert.equal(utils.getProperties(null), undefined);
 	});
 
 
 	test('can get detail from xerror', function () {
 		class FooError extends XError { };
 		const detail = { foo: 'bar' };
-		const error = new FooError().setDetail(detail);
+		const error = new FooError().setInfo(detail);
 
-		assert.strictEqual(utils.getDetail(error), detail);
+		assert.strictEqual(utils.getProperties(error), detail);
 	});
 
 	test('can get detail from error', function () {
 		const error: any = new Error();
 		error.name = 'foo';
 		error.foo = 'bar';
-		const data = utils.getDetail(error);
+		const data = utils.getProperties(error);
 
 		assert.deepEqual(data, { foo: 'bar' });
 	})
@@ -34,7 +34,7 @@ suite('toErrorJson', function() {
 
 		assert.equal(json.name, 'Error');
 		assert.equal(json.message, '');
-		assert.equal(json.detail, undefined);
+		assert.equal(json.info, undefined);
 		assert.equal(json.cause, undefined);
 		assert.equal(json.id, undefined);
 		assert.isNotNaN(Date.parse(json.time));
@@ -47,7 +47,7 @@ suite('toErrorJson', function() {
 
 		assert.equal(json.cause?.name, 'Error');
 		assert.equal(json.cause?.message, 'bar');
-		assert.equal(json.cause?.detail, undefined);
+		assert.equal(json.cause?.info, undefined);
 		assert.equal(json.cause?.cause, undefined);
 		assert.equal(json.cause?.id, undefined);
 		assert.isNotNaN(Date.parse(json.time));
@@ -62,7 +62,7 @@ suite('toErrorJson', function() {
 		const json = utils.toErrorJson(error);
 		assert.equal(json.name, '');
 		assert.equal(json.message, '');
-		assert.equal(json.detail, undefined);
+		assert.equal(json.info, undefined);
 		assert.equal(json.cause, undefined);
 		assert.equal(json.id, undefined);
 		assert.isNotNaN(Date.parse(json.time));

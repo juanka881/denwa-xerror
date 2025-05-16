@@ -1,5 +1,5 @@
 /**
- * ErrorJSON use to structure the error data
+ * ErrorJson use to structure the error data
  * so it can be easily serialized into json
  */
 export interface ErrorJson {
@@ -14,7 +14,7 @@ export interface ErrorJson {
 	time: string;
 
 	/**
-	 * error which cause this error to occur
+	 * underlying error that caused this error to occur
 	 */
 	cause?: ErrorJson;
 
@@ -41,7 +41,7 @@ export interface ErrorJson {
 	/**
 	 * data related to the error being thrown
 	 */
-	detail?: Record<string, any>;
+	info?: Record<string, any>;
 
 	/**
 	 * error retryable flag

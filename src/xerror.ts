@@ -7,7 +7,7 @@ import { isType, toErrorJson } from './utils.js';
  * serialized to json to capture all error details
  * for troubleshooting.
  */
-export class XError<TDetail = any> extends Error {
+export class XError extends Error {
 	/**
 	 * error id
 	 */
@@ -29,9 +29,9 @@ export class XError<TDetail = any> extends Error {
 	code?: string;
 
 	/**
-	 * error details
+	 * error information
 	 */
-	detail?: TDetail;
+	info?: Record<string, unknown>;
 
 	/**
 	 * error retryable flag
@@ -41,10 +41,9 @@ export class XError<TDetail = any> extends Error {
 	/**
 	 * creates a new xerror instance
 	 * @param message error message
-	 * @param detail addtional error detail data
-	 * @param cause error which cause this error
+	 * @param info error information
 	 */
-	constructor(message?: string, detail?: TDetail) {
+	constructor(message?: string, info?: Record<string, unknown>) {
 		super(message);
 		Object.setPrototypeOf(this, new.target.prototype);
 
@@ -57,7 +56,7 @@ export class XError<TDetail = any> extends Error {
 			(Error as any).captureStackTrace(this, this.constructor);
 		}
 
-		this.detail = detail;
+		this.info = info;
 		this.retryable = true;
 		this.time = new Date();
 	}
@@ -121,12 +120,12 @@ export class XError<TDetail = any> extends Error {
 	}
 
 	/**
-	 * set error detail
-	 * @param detail error detail
+	 * set error info
+	 * @param info error information
 	 * @returns self
 	 */
-	setDetail(detail: TDetail): this {
-		this.detail = detail;
+	setInfo(info: Record<string, unknown>): this {
+		this.info = info;
 		return this;
 	}
 

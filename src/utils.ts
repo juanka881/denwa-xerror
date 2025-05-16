@@ -7,16 +7,16 @@ import { XError } from './xerror.js';
  * @param error error object
  * @returns error properties object
  */
-export function getDetail(error?: unknown): Record<string, any> | undefined {
+export function getProperties(error?: unknown): Record<string, any> | undefined {
 	if (error === null || error == undefined) {
 		return undefined;
 	}
 
 	if (error instanceof XError) {
-		return error.detail;
+		return error.info;
 	}
 
-	let detail: any;
+	let properties: any;
 	for (const [key, value] of Object.entries(error)) {
 		const skip = key === 'name'
 			|| key === 'message'
@@ -26,14 +26,14 @@ export function getDetail(error?: unknown): Record<string, any> | undefined {
 			continue;
 		}
 
-		if (!detail) {
-			detail = {};
+		if (!properties) {
+			properties = {};
 		}
 
-		detail[key] = value;
+		properties[key] = value;
 	}
 
-	return detail;
+	return properties;
 }
 
 /**
@@ -48,7 +48,7 @@ export function toErrorJson(error: Error | unknown): ErrorJson {
 	const message = _error?.message ?? '';
 	const stack = _error?.stack?.split('\n') ?? [];
 
-	const detail: any = error instanceof XError ? error.detail : getDetail(error);
+	const info: any = error instanceof XError ? error.info : getProperties(error);
 	const retryable = error instanceof XError ? error.retryable : true;
 	const cause = _error.cause ? toErrorJson(_error.cause) : undefined;
 	const id = _error.id;
@@ -58,7 +58,7 @@ export function toErrorJson(error: Error | unknown): ErrorJson {
 		name,
 		message,
 		stack,
-		detail,
+		info,
 		cause,
 		id,
 		time,
@@ -83,18 +83,18 @@ export function isType<TType extends Error | unknown>(error: unknown | undefined
   * creates a formatted error
   * @param name error name
   * @param message error reason
-  * @param detail error context data
+  * @param info error context data
   */
-export function errorf(name: string, message: string, detail?: Record<string, any>): Error {
+export function errorf(name: string, message: string, info?: Record<string, any>): Error {
 	let fields: string | undefined;
-	if (detail) {
-		fields = Object.entries(detail).map(([k, v]) => `${k}=${v}`).join(', ');
+	if (info) {
+		fields = Object.entries(info).map(([k, v]) => `${k}=${v}`).join(', ');
 		message = `${message}. ${fields}`;
 	}
 
 	const error = new Error(message);
 	error.name = name;
-	(error as any).detail = detail;
+	(error as any).info = info;
 
 	return error;
 }
@@ -104,10 +104,10 @@ export function errorf(name: string, message: string, detail?: Record<string, an
  * joining the message parts, along with a
  * list of key value pairs passed in the detail
  * @param message message parts
- * @param detail message detail
+ * @param info message detail
  * @returns message text
  */
-export function messagef(message: string | string[], detail?: Record<string, any>): string {
+export function messagef(message: string | string[], info?: Record<string, any>): string {
 	let text = '';
 	if(Array.isArray(message)) {
 		text = message.join(' ');
@@ -117,8 +117,8 @@ export function messagef(message: string | string[], detail?: Record<string, any
 	}
 
 	let fields: string | undefined;
-	if (detail) {
-		fields = Object.entries(detail).map(([k, v]) => `${k}=${v}`).join(', ');
+	if (info) {
+		fields = Object.entries(info).map(([k, v]) => `${k}=${v}`).join(', ');
 		text = `${text}. ${fields}`;
 	}
 

@@ -28,7 +28,7 @@ suite('XError', function() {
 		const detail = { foo: 'bar' }
 		const error = new TestError('foo', detail);
 		assert.equal(error.message, 'foo');
-		assert.strictEqual(error.detail, detail);
+		assert.strictEqual(error.info, detail);
 	});
 
 	test('can set message', function() {
@@ -48,8 +48,8 @@ suite('XError', function() {
 
 	test('can set detail', function() {
 		const detail = { foo: 'bar' };
-		const error = new TestError().setDetail(detail);
-		assert.strictEqual(error.detail, detail);
+		const error = new TestError().setInfo(detail);
+		assert.strictEqual(error.info, detail);
 	});
 
 	test('can set cause', function() {
@@ -65,14 +65,14 @@ suite('XError', function() {
 
 	test('can convert error to json', function() {
 		const detail = { foo: 'bar' };
-		const error = new TestError().setDetail(detail);
+		const error = new TestError().setInfo(detail);
 		const json: ErrorJson = JSON.parse(JSON.stringify(error));
 
 		assert.equal(json.name, TestError.name);
 		assert.equal(json.message, 'test error');
 		assert.isTrue(Array.isArray(json.stack));
-		assert.isObject(json.detail);
-		assert.deepEqual(json.detail, detail);
+		assert.isObject(json.info);
+		assert.deepEqual(json.info, detail);
 
 	});
 
