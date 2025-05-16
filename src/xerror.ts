@@ -7,7 +7,7 @@ import { isType, toErrorJson } from './utils.js';
  * serialized to json to capture all error details
  * for troubleshooting.
  */
-export class XError extends Error {
+export class XError<TInfo extends object = Record<string, unknown>> extends Error {
 	/**
 	 * error id
 	 */
@@ -31,7 +31,7 @@ export class XError extends Error {
 	/**
 	 * error information
 	 */
-	info?: Record<string, unknown>;
+	info?: TInfo;
 
 	/**
 	 * error retryable flag
@@ -43,7 +43,7 @@ export class XError extends Error {
 	 * @param message error message
 	 * @param info error information
 	 */
-	constructor(message?: string, info?: Record<string, unknown>) {
+	constructor(message?: string, info?: TInfo) {
 		super(message);
 		Object.setPrototypeOf(this, new.target.prototype);
 
@@ -124,7 +124,7 @@ export class XError extends Error {
 	 * @param info error information
 	 * @returns self
 	 */
-	setInfo(info: Record<string, unknown>): this {
+	setInfo(info: TInfo): this {
 		this.info = info;
 		return this;
 	}
