@@ -1,8 +1,8 @@
 /**
- * ErrorJson use to structure the error data
+ * ErrorDTO use to structure the error data
  * so it can be easily serialized into json
  */
-export interface ErrorJson {
+export interface ErrorDTO {
 	/**
 	 * error id
 	 */
@@ -16,7 +16,7 @@ export interface ErrorJson {
 	/**
 	 * underlying error that caused this error to occur
 	 */
-	cause?: ErrorJson;
+	cause?: ErrorDTO;
 
 	/**
 	 * error code
@@ -39,9 +39,9 @@ export interface ErrorJson {
 	stack: string[];
 
 	/**
-	 * data related to the error being thrown
+	 * error properties
 	 */
-	info?: Record<string, any>;
+	properties?: Record<string, any>;
 
 	/**
 	 * error retryable flag

@@ -1,5 +1,5 @@
-import { ErrorJson } from './types.js';
-import { isType, toErrorJson } from './utils.js';
+import { ErrorDTO } from './types.js';
+import { isErrorType, toErrorDTO } from './utils.js';
 
 /**
  * Create custom error types by extending XErrror.
@@ -7,7 +7,7 @@ import { isType, toErrorJson } from './utils.js';
  * serialized to json to capture all error details
  * for troubleshooting.
  */
-export class XError<TInfo extends object = Record<string, unknown>> extends Error {
+export class XError<TProps extends object = Record<string, any>> extends Error {
 	/**
 	 * error id
 	 */
@@ -29,9 +29,9 @@ export class XError<TInfo extends object = Record<string, unknown>> extends Erro
 	code?: string;
 
 	/**
-	 * error information
+	 * error properties
 	 */
-	info?: TInfo;
+	properties?: TProps;
 
 	/**
 	 * error retryable flag
@@ -41,9 +41,9 @@ export class XError<TInfo extends object = Record<string, unknown>> extends Erro
 	/**
 	 * creates a new xerror instance
 	 * @param message error message
-	 * @param info error information
+	 * @param properties error properties
 	 */
-	constructor(message?: string, info?: TInfo) {
+	constructor(message?: string, properties?: TProps) {
 		super(message);
 		Object.setPrototypeOf(this, new.target.prototype);
 
@@ -56,17 +56,25 @@ export class XError<TInfo extends object = Record<string, unknown>> extends Erro
 			(Error as any).captureStackTrace(this, this.constructor);
 		}
 
-		this.info = info;
+		this.properties = properties;
 		this.retryable = true;
 		this.time = new Date();
 	}
 
 	/**
-	 * converts xerror instance to json object
+	 * converts xerror instance to data transfer object
 	 * @returns error dto
 	 */
-	toJSON(): ErrorJson {
-		return toErrorJson(this);
+	toDTO(): ErrorDTO {
+		return toErrorDTO(this);
+	}
+
+	/**
+	 * converts xerror instance to json
+	 * @returns error dto
+	 */
+	toJSON(): ErrorDTO {
+		return this.toDTO();
 	}
 
 	/**
@@ -76,7 +84,7 @@ export class XError<TInfo extends object = Record<string, unknown>> extends Erro
 	 * @returns true if same, false otherwise
 	 */
 	isType<TType extends Error | unknown>(type: TType): this is TType {
-		return isType(this, type);
+		return isErrorType(this, type);
 	}
 
 	/**
@@ -120,12 +128,12 @@ export class XError<TInfo extends object = Record<string, unknown>> extends Erro
 	}
 
 	/**
-	 * set error info
-	 * @param info error information
+	 * set error properties
+	 * @param properties error properties
 	 * @returns self
 	 */
-	setInfo(info: TInfo): this {
-		this.info = info;
+	setProperties(properties: TProps): this {
+		this.properties = properties;
 		return this;
 	}
 

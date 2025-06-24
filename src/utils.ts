@@ -1,4 +1,4 @@
-import { ErrorJson } from './types.js';
+import { ErrorDTO } from './types.js';
 import { XError } from './xerror.js';
 
 /**
@@ -7,13 +7,13 @@ import { XError } from './xerror.js';
  * @param error error object
  * @returns error properties object
  */
-export function getProperties(error?: unknown): Record<string, any> | undefined {
+export function getErrorProperties(error?: unknown): Record<string, any> | undefined {
 	if (error === null || error == undefined) {
 		return undefined;
 	}
 
 	if (error instanceof XError) {
-		return error.info;
+		return error.properties;
 	}
 
 	let properties: any;
@@ -42,15 +42,15 @@ export function getProperties(error?: unknown): Record<string, any> | undefined 
  * are extracted via the getDetail fn
  * @param error error instance
  */
-export function toErrorJson(error: Error | unknown): ErrorJson {
+export function toErrorDTO(error: Error | unknown): ErrorDTO {
 	const _error = error as any;
 	const name = _error?.name ?? '';
 	const message = _error?.message ?? '';
 	const stack = _error?.stack?.split('\n') ?? [];
 
-	const info: any = error instanceof XError ? error.info : getProperties(error);
+	const info: any = error instanceof XError ? error.properties : getErrorProperties(error);
 	const retryable = error instanceof XError ? error.retryable : true;
-	const cause = _error.cause ? toErrorJson(_error.cause) : undefined;
+	const cause = _error.cause ? toErrorDTO(_error.cause) : undefined;
 	const id = _error.id;
 	const time = _error.time ?? new Date();
 
@@ -58,7 +58,7 @@ export function toErrorJson(error: Error | unknown): ErrorJson {
 		name,
 		message,
 		stack,
-		info,
+		properties: info,
 		cause,
 		id,
 		time,
@@ -72,7 +72,7 @@ export function toErrorJson(error: Error | unknown): ErrorJson {
  * @param type error class
  * @returns true if matches, false otherwise
  */
-export function isType<TType extends Error | unknown>(error: unknown | undefined | null, type: TType): error is TType {
+export function isErrorType<TType extends Error | unknown>(error: unknown | undefined | null, type: TType): error is TType {
 	if (error === null || error === undefined) {
 		return false;
 	}
@@ -83,18 +83,18 @@ export function isType<TType extends Error | unknown>(error: unknown | undefined
   * creates a formatted error
   * @param name error name
   * @param message error reason
-  * @param info error context data
+  * @param properties error properties
   */
-export function errorf(name: string, message: string, info?: Record<string, any>): Error {
+export function formattedError(name: string, message: string, properties?: Record<string, any>): Error {
 	let fields: string | undefined;
-	if (info) {
-		fields = Object.entries(info).map(([k, v]) => `${k}=${v}`).join(', ');
+	if (properties) {
+		fields = Object.entries(properties).map(([k, v]) => `${k}=${v}`).join(', ');
 		message = `${message}. ${fields}`;
 	}
 
 	const error = new Error(message);
 	error.name = name;
-	(error as any).info = info;
+	(error as any).properties = properties;
 
 	return error;
 }
@@ -102,12 +102,12 @@ export function errorf(name: string, message: string, info?: Record<string, any>
 /**
  * creates a formatted error message
  * joining the message parts, along with a
- * list of key value pairs passed in the detail
+ * list of key value pairs passed in the properties
  * @param message message parts
- * @param info message detail
+ * @param properties message properties
  * @returns message text
  */
-export function messagef(message: string | string[], info?: Record<string, any>): string {
+export function messageFormat(message: string | string[], properties?: Record<string, any>): string {
 	let text = '';
 	if(Array.isArray(message)) {
 		text = message.join(' ');
@@ -117,8 +117,8 @@ export function messagef(message: string | string[], info?: Record<string, any>)
 	}
 
 	let fields: string | undefined;
-	if (info) {
-		fields = Object.entries(info).map(([k, v]) => `${k}=${v}`).join(', ');
+	if (properties) {
+		fields = Object.entries(properties).map(([k, v]) => `${k}=${v}`).join(', ');
 		text = `${text}. ${fields}`;
 	}
 

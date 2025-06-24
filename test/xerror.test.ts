@@ -1,11 +1,11 @@
 import { test, suite, assert } from 'vitest';
 import { XError } from '../src/xerror.js';
-import { ErrorJson } from '../src/types.js';
+import { ErrorDTO } from '../src/types.js';
 
 suite('XError', function() {
 	class TestError extends XError {
-		constructor(message?: string, detail?: any) {
-			super(message ?? 'test error', detail);
+		constructor(message?: string, properties?: any) {
+			super(message ?? 'test error', properties);
 			this.retryable = false;
 		}
 	}
@@ -28,7 +28,7 @@ suite('XError', function() {
 		const detail = { foo: 'bar' }
 		const error = new TestError('foo', detail);
 		assert.equal(error.message, 'foo');
-		assert.strictEqual(error.info, detail);
+		assert.strictEqual(error.properties, detail);
 	});
 
 	test('can set message', function() {
@@ -48,8 +48,8 @@ suite('XError', function() {
 
 	test('can set detail', function() {
 		const detail = { foo: 'bar' };
-		const error = new TestError().setInfo(detail);
-		assert.strictEqual(error.info, detail);
+		const error = new TestError().setProperties(detail);
+		assert.strictEqual(error.properties, detail);
 	});
 
 	test('can set cause', function() {
@@ -63,17 +63,16 @@ suite('XError', function() {
 		assert.equal(error.retryable, false);
 	});
 
-	test('can convert error to json', function() {
-		const detail = { foo: 'bar' };
-		const error = new TestError().setInfo(detail);
-		const json: ErrorJson = JSON.parse(JSON.stringify(error));
+	test('can convert error to dto', function() {
+		const properties = { foo: 'bar' };
+		const error = new TestError().setProperties(properties);
+		const dto: ErrorDTO = JSON.parse(JSON.stringify(error));
 
-		assert.equal(json.name, TestError.name);
-		assert.equal(json.message, 'test error');
-		assert.isTrue(Array.isArray(json.stack));
-		assert.isObject(json.info);
-		assert.deepEqual(json.info, detail);
-
+		assert.equal(dto.name, TestError.name);
+		assert.equal(dto.message, 'test error');
+		assert.isTrue(Array.isArray(dto.stack));
+		assert.isObject(dto.properties);
+		assert.deepEqual(dto.properties, properties);
 	});
 
 	test('can check type', function() {
